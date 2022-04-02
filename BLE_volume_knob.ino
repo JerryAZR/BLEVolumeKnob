@@ -10,23 +10,23 @@
  * @version 0.1
  * @date 2022-03-31
  * 
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2022 Zerui An
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License,or (at your
+ * option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <https://www.gnu.org/licenses/>. 
  * 
  */
 
-/*********************************************************************
- This is an example for our nRF52 based Bluefruit LE modules
-
- Pick one up today in the adafruit shop!
-
- Adafruit invests time and resources providing this open source code,
- please support Adafruit and open-source hardware by purchasing
- products from Adafruit!
-
- MIT license, check LICENSE for more information
- All text above, and the splash screen below must be included in
- any redistribution
-*********************************************************************/
 #include <bluefruit.h>
 #include <RotaryEncoderD.h>
 
@@ -42,6 +42,7 @@ const uint8_t CLK_PIN = 0;
 const uint8_t DT_PIN  = 1;
 const uint8_t SW_PIN  = 2;
 
+// As far as I know, either one of these functions would work.
 void keyTap(BLEHidAdafruit& hid, uint8_t keyCode);
 void CCTap(BLEHidAdafruit& hid, uint8_t usageCode);
 
@@ -57,14 +58,12 @@ void setup()
   Serial.println("--------------------------------\n");
 
   Serial.println();
-  Serial.println("Go to your phone's Bluetooth settings to pair your device");
+  Serial.println("Go to your PC or phone's Bluetooth settings to pair your device");
 
   // Initialize the encoder
   encoder.begin();
   
-  // configure the encoder pins as input
-  // pinMode(CLK_PIN, INPUT);
-  // pinMode(DT_PIN, INPUT);
+  // configure the switch as input
   pinMode(SW_PIN, INPUT);
 
 
@@ -76,20 +75,8 @@ void setup()
   bledis.setModel("Seeeduino XIAO BLE");
   bledis.begin();
 
-  /* Start BLE HID
-   * Note: Apple requires BLE device must have min connection interval >= 20m
-   * ( The smaller the connection interval the faster we could send data).
-   * However for HID and MIDI device, Apple could accept min connection interval 
-   * up to 11.25 ms. Therefore BLEHidAdafruit::begin() will try to set the min and max
-   * connection interval to 11.25  ms and 15 ms respectively for best performance.
-   */
+  // Start BLE HID
   blehid.begin();
-
-  /* Set connection interval (min, max) to your perferred value.
-   * Note: It is already set by BLEHidAdafruit::begin() to 11.25ms - 15ms
-   * min = 9*1.25=11.25 ms, max = 12*1.25= 15 ms 
-   */
-  /* Bluefruit.Periph.setConnInterval(9, 12); */
 
   // Set up and start advertising
   startAdv();
@@ -113,7 +100,9 @@ void startAdv(void)
    * - Enable auto advertising if disconnected
    * - Interval:  fast mode = 20 ms, slow mode = 152.5 ms
    * - Timeout for fast mode is 30 seconds
-   * - Start(timeout) with timeout = 0 will advertise forever (until connected)
+   * - Start(timeout) with timeout = 0 will advertise forever (until connected).
+   *   Otherwise it will advertise for (x * 10) ms, then stop advertising
+   *   and invoke the stop callback function (if set);
    * 
    * For recommended advertising interval
    * https://developer.apple.com/library/content/qa/qa1931/_index.html   
@@ -121,7 +110,7 @@ void startAdv(void)
   Bluefruit.Advertising.restartOnDisconnect(true);
   Bluefruit.Advertising.setInterval(32, 244);    // in unit of 0.625 ms
   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
-  Bluefruit.Advertising.start(0);                // 0 = Don't stop advertising after n seconds
+  Bluefruit.Advertising.start(0);
 }
 
 void loop() 
