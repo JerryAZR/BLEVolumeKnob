@@ -28,7 +28,7 @@
  */
 
 #include <bluefruit.h>
-#include <RotaryEncoderD.h>
+#include "RotaryEncoderD.h"
 
 const uint8_t KEY_MUTE        = 0x7f; // Keyboard Mute
 const uint8_t KEY_VOLUMEUP    = 0x80; // Keyboard Volume Up
